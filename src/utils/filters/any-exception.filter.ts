@@ -7,7 +7,6 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { LoggerService } from '../modules/logger/logger.service';
-import { TelegramService } from '../telegram/telegram.service';
 import { now } from '../helpers';
 
 @Injectable()
@@ -15,7 +14,7 @@ import { now } from '../helpers';
 export class AnyExceptionFilter implements ExceptionFilter {
   constructor(
     private readonly logService: LoggerService,
-    private readonly telegramService: TelegramService,
+    private readonly telegramService: any,
   ) {}
 
   catch(exception: HttpException | Error, host: ArgumentsHost) {

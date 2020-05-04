@@ -1,21 +1,20 @@
-import { PrimaryGeneratedColumn, Column, BeforeInsert } from "typeorm";
+import { PrimaryGeneratedColumn, Column, BeforeInsert } from 'typeorm';
 
-export class BaseEntity {
+export class AppBaseEntity {
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @PrimaryGeneratedColumn()
-    id: number
+  @Column({ type: 'bigint' })
+  createdAt: number;
 
-    @Column({type: 'bigint'})
-    createdAt: number
+  @Column({ type: 'bigint' })
+  updatedAt: number;
 
-    @Column({type: 'bigint'})
-    updatedAt: number
+  @Column({ type: 'bigint' })
+  deletedAt: number;
 
-    @Column({type: 'bigint'})
-    deletedAt: number
-
-    @BeforeInsert()
-    beforeCreate(){
-        this.createdAt = Date.now();
-    }
+  @BeforeInsert()
+  beforeCreate() {
+    this.createdAt = Date.now();
+  }
 }

@@ -1,6 +1,6 @@
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule } from '../../config/config.module';
-import { ConfigService } from '../../config/config.service';
+import { ConfigModule } from '../config/config.module';
+import { ConfigService } from '../config/config.service';
 
 export const mongoConfigProvider = TypeOrmModule.forRootAsync({
   name: 'mongodb',
@@ -16,17 +16,16 @@ export const mongoConfigProvider = TypeOrmModule.forRootAsync({
       database: config.getValue('TYPEORM_MONGO_DATABASE'),
       useNewUrlParser: true,
       synchronize: true,
-      entities: [__dirname + '/../**/*.entity.mongo{.ts,.js}'],
-      migrations: [__dirname + '/../../migration_mongo/*.ts'],
+      entities: [__dirname + '/../../**/*.entity{.ts,.js}'],
+      migrations: [__dirname + '/../../../migration/*.ts'],
     };
   },
 });
 
-export const mysqlConfigProvider = TypeOrmModule.forRootAsync({
+export const postgresConfigProvider = TypeOrmModule.forRootAsync({
   imports: [ConfigModule],
   inject: [ConfigService],
   useFactory: (config: ConfigService) => {
-    console.log('forRootAsync');
     const configDatabaseName = 'TYPEORM_DATABASE';
     const databaseName = config.getValue(configDatabaseName);
 
@@ -44,6 +43,7 @@ export const mysqlConfigProvider = TypeOrmModule.forRootAsync({
               : databaseName + '_test'
           }`
         : databaseName;
+
     return {
       type: 'postgres',
       host: config.getValue('TYPEORM_HOST'),
@@ -51,7 +51,7 @@ export const mysqlConfigProvider = TypeOrmModule.forRootAsync({
       username: config.getValue('TYPEORM_USERNAME'),
       password: config.getValue('TYPEORM_PASSWORD'),
       database,
-      entities: [__dirname + '/../../**/*.entity{.ts,.js}'],
+      entities: [__dirname + '/../../../**/*.entity{.ts,.js}'],
       migrations: [__dirname + '/../../../migration/*.ts'],
       multipleStatements: process.env.NODE_ENV === 'test',
       logging: !!config.getValue('TYPEORM_LOGGING'),
