@@ -21,7 +21,7 @@ export class UsersController {
 
   @Get(':id')
   async getById(@Param('id', ParseIntPipe) userId: number): Promise<User> {
-    return this.usersService.findOne(userId);
+    return this.usersService.findById(userId);
   }
 
   @Post()

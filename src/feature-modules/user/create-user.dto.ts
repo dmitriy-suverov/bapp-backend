@@ -1,5 +1,5 @@
 import { IsString, IsEmail, MinLength, MaxLength } from 'class-validator';
-import { Match } from 'src/utils/decorators/match';
+import { Match } from '../utils/decorators/match';
 
 export class CreateUserDto {
   @IsString()
