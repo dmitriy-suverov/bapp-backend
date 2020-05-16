@@ -13,7 +13,7 @@ export class User extends AppBaseEntity {
   email: string;
 
   @Exclude()
-  @Column()
+  @Column() 
   passwordHash: string;
 
   @Column({ default: false })
