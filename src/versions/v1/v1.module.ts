@@ -5,7 +5,7 @@ import { UserModule } from 'src/feature-modules/user/user.module';
 import { AuthModule } from 'src/feature-modules/auth/auth.module';
 
 @Module({
-  controllers: [UsersController, AuthController],
+  controllers: [AuthController, UsersController],
   imports: [UserModule, AuthModule],
 })
 export class V1Module {}

@@ -7,7 +7,7 @@ import {
 import { User } from './user.entity';
 import { Repository, FindConditions, FindOneOptions } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UpdateUserDto } from './update-user.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -17,6 +17,10 @@ export class UserService {
 
   public async findById(userId: User['id']): Promise<User> {
     return this.findOneByCriteria({ where: { id: userId } });
+  }
+
+  public findByLogin(login: User['login']): Promise<User> {
+    return this.findOneByCriteria({ where: { login } });
   }
 
   public async getAll(criteria?: FindConditions<User>): Promise<User[]> {
@@ -30,12 +34,8 @@ export class UserService {
     email: User['email'],
     password: User['passwordHash'],
   ): Promise<User> {
-    const existingUsers: User[] = await this.userRepository
-      .createQueryBuilder('user')
-      .where('user.login = :login', { login })
-      .orWhere('user.email = :email', { email })
-      .getMany();
-    if (existingUsers.length > 0) {
+    const result = await this.checkIfLoginAndEmailAreUsed(login, email);
+    if (result) {
       throw new BadRequestException(
         `User with such login or email already exists`,
       );
@@ -44,20 +44,33 @@ export class UserService {
     const newUser = this.userRepository.create();
     console.log('UserService -> newUser', newUser);
     newUser.email = email;
-    newUser.passwordHash = await newUser.getPasswordHash(password);
+    newUser.passwordHash = await this.getPasswordHash(password);
     newUser.login = login;
-    this.userRepository.save(newUser);
+    await this.userRepository.save(newUser);
 
     console.log('UserService -> constructor -> newUser', newUser);
     return newUser;
   }
 
+  private async checkIfLoginAndEmailAreUsed(
+    login: string,
+    email: string,
+  ): Promise<boolean> {
+    const users = await this.userRepository
+      .createQueryBuilder('user')
+      .where('user.login = :login', { login })
+      .orWhere('user.email = :email', { email })
+      .getMany();
+
+    return users.length > 0 ? true : false;
+  }
+
   public async updateUser(
     userId: User['id'],
-    dto: Partial<UpdateUserDto>,
+    fieldsToUpdate: Partial<User>,
   ): Promise<User> {
     const user = await this.findById(userId);
-    Object.assign(user, dto);
+    Object.assign(user, fieldsToUpdate);
     this.userRepository.save(user);
     return user;
   }
@@ -67,10 +80,10 @@ export class UserService {
     oldPassword: string,
     newPassword: string,
   ) {
-    if (!(await user.validatePassword(oldPassword))) {
+    if (!(await this.validatePassword(oldPassword, user.passwordHash))) {
       throw new ForbiddenException('Old password is incorrect');
     }
-    user.passwordHash = await user.getPasswordHash(newPassword);
+    user.passwordHash = await this.getPasswordHash(newPassword);
     return this.userRepository.save(user);
   }
 
@@ -89,5 +102,13 @@ export class UserService {
     }
 
     return user;
+  }
+
+  public validatePassword(password: string, passwordHash: string) {
+    return bcrypt.compare(password, passwordHash);
+  }
+
+  public getPasswordHash(password: string) {
+    return bcrypt.hash(password, 10);
   }
 }

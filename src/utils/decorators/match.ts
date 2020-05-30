@@ -13,6 +13,14 @@ export class MatchConstraint implements ValidatorConstraintInterface {
     const relatedValue = (args.object as any)[relatedPropertyName];
     return value === relatedValue;
   }
+
+  defaultMessage(validationArguments?: ValidationArguments): string {
+    console.log(
+      'MatchConstraint -> defaultMessage -> validationArguments',
+      validationArguments,
+    );
+    return `"${validationArguments.property}" must be same as "${validationArguments.constraints[0]}"`;
+  }
 }
 
 export function Match(property: string, validationOptions?: ValidationOptions) {

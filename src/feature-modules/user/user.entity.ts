@@ -1,10 +1,20 @@
 import { Entity, Column } from 'typeorm';
-import * as bcrypt from 'bcrypt';
 
 import { AppBaseEntity } from '../../utils/base.entity';
 import { Exclude } from 'class-transformer';
 
-@Entity()
+export const UserEntityConstraints = {
+  password: {
+    min: 4,
+    max: 10,
+  },
+  login: {
+    min: 4,
+    max: 15,
+  },
+};
+
+@Entity({ name: 'users' })
 export class User extends AppBaseEntity {
   @Column({ unique: true })
   login: string;
@@ -13,17 +23,9 @@ export class User extends AppBaseEntity {
   email: string;
 
   @Exclude()
-  @Column() 
+  @Column()
   passwordHash: string;
 
   @Column({ default: false })
   isConfirmed: boolean;
-
-  validatePassword(password: string) {
-    return bcrypt.compare(password, this.passwordHash);
-  }
-
-  getPasswordHash(password: string) {
-    return bcrypt.hash(password, 10);
-  }
 }
